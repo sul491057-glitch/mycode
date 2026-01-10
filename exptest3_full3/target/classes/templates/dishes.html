@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>菜品服务</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <style>
+    /* 简化的样式，实际请配合你的布局 */
+    body { background: #f5f7fa; margin: 0; padding: 20px; font-family: sans-serif; }
+    .dish-card { margin-bottom: 20px; transition: all 0.3s; }
+    .dish-card:hover { transform: translateY(-5px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .image-placeholder { height: 150px; background: #e9e9eb; display: flex; align-items: center; justify-content: center; color: #909399; font-size: 40px; }
+    .price { color: #f56c6c; font-weight: bold; font-size: 18px; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <el-card>
+    <div slot="header">
+      <span style="font-weight: bold; font-size: 18px;">菜品服务</span>
+      <el-button style="float: right;" type="primary" size="small" icon="el-icon-plus" @click="dialogVisible = true">新增菜品</el-button>
+    </div>
+
+    <el-tabs v-model="activeCategory" @tab-click="fetchDishes">
+      <el-tab-pane label="全部菜品" name="全部"></el-tab-pane>
+      <el-tab-pane label="热菜" name="热菜"></el-tab-pane>
+      <el-tab-pane label="凉菜" name="凉菜"></el-tab-pane>
+      <el-tab-pane label="饮品" name="饮品"></el-tab-pane>
+    </el-tabs>
+
+    <el-row :gutter="20">
+      <el-col :span="6" v-for="item in dishList" :key="item.id">
+        <el-card :body-style="{ padding: '0px' }" class="dish-card">
+          <div class="image-placeholder"><i class="el-icon-picture-outline"></i></div>
+          <div style="padding: 14px;">
+            <div style="font-weight: bold;">{{ item.name }}</div>
+            <div style="color: #999; font-size: 12px; margin: 5px 0;">{{ item.category }}</div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span class="price">¥ {{ item.price }}</span>
+              <el-button type="danger" icon="el-icon-delete" circle size="mini" @click="handleDelete(item.id)"></el-button>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
+  </el-card>
+
+  <el-dialog title="新增菜品" :visible.sync="dialogVisible" width="30%">
+    <el-form :model="form">
+      <el-form-item label="菜名"><el-input v-model="form.name"></el-input></el-form-item>
+      <el-form-item label="分类">
+        <el-select v-model="form.category"><el-option value="热菜" label="热菜"></el-option><el-option value="饮品" label="饮品"></el-option></el-select>
+      </el-form-item>
+      <el-form-item label="价格"><el-input v-model="form.price"></el-input></el-form-item>
+    </el-form>
+    <div slot="footer" class="dialog-footer">
+      <el-button @click="dialogVisible = false">取 消</el-button>
+      <el-button type="primary" @click="handleAdd">确 定</el-button>
+    </div>
+  </el-dialog>
+</div>
+
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+  new Vue({
+    el: '#app',
+    data: {
+      activeCategory: '全部',
+      dishList: [],
+      dialogVisible: false,
+      form: { name: '', category: '热菜', price: '' }
+    },
+    created() { this.fetchDishes(); },
+    methods: {
+      fetchDishes() {
+        axios.get('/dish/list', { params: { category: this.activeCategory } }).then(res => {
+          this.dishList = res.data.data;
+        });
+      },
+      handleAdd() {
+        axios.post('/dish', this.form).then(res => {
+          this.dialogVisible = false;
+          this.fetchDishes();
+          this.$message.success('添加成功');
+        });
+      },
+      handleDelete(id) {
+        this.$confirm('确定删除?').then(() => {
+          axios.delete('/dish/' + id).then(() => {
+            this.fetchDishes();
+            this.$message.success('删除成功');
+          });
+        });
+      }
+    }
+  })
+</script>
+</body>
+</html>
