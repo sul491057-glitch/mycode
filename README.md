@@ -28,5 +28,5 @@
 ## 📦 快速启动
 1. 导入数据库脚本 `restaurant_db.sql`。
 2. 修改 `application.yml` 中的数据库与 Redis 连接配置。
-3. 启动 `ManagementApplication.java` 后端服务。
+3. 启动 `Application.java` 后端服务。
 4. 进入 `frontend` 目录，执行 `npm install` 与 `npm run dev` 启动前端。# mycode
