@@ -74,7 +74,10 @@ const form = reactive({
 
 const rules = {
   name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
-  phone: [{ required: true, message: '请输入手机号', trigger: 'blur' }],
+  phone: [
+    { required: true, message: '请输入手机号', trigger: 'blur' },
+    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的11位手机号', trigger: 'blur' }
+  ],
   date: [{ required: true, message: '请选择日期', trigger: 'change' }],
   time: [{ required: true, message: '请选择时间', trigger: 'change' }],
   peopleCount: [{ required: true, message: '请输入人数', trigger: 'change' }],

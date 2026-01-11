@@ -9,13 +9,25 @@
       </div>
       
       <el-menu
-        default-active="/admin/dashboard"
+        :default-active="route.path"
         class="flex-1 border-none py-4 px-2 custom-menu"
         router
       >
         <el-menu-item index="/admin/dashboard" class="rounded-xl mb-2 hover:bg-indigo-50 transition-colors">
-          <el-icon><Menu /></el-icon>
-          <span class="font-medium">订单与推荐管理</span>
+          <el-icon><Odometer /></el-icon>
+          <span class="font-medium">仪表盘</span>
+        </el-menu-item>
+        <el-menu-item index="/admin/orders" class="rounded-xl mb-2 hover:bg-indigo-50 transition-colors">
+          <el-icon><List /></el-icon>
+          <span class="font-medium">订单管理</span>
+        </el-menu-item>
+        <el-menu-item index="/admin/reservations" class="rounded-xl mb-2 hover:bg-indigo-50 transition-colors">
+          <el-icon><Calendar /></el-icon>
+          <span class="font-medium">预定管理</span>
+        </el-menu-item>
+        <el-menu-item index="/admin/products" class="rounded-xl mb-2 hover:bg-indigo-50 transition-colors">
+          <el-icon><KnifeFork /></el-icon>
+          <span class="font-medium">菜品及推荐管理</span>
         </el-menu-item>
       </el-menu>
 
@@ -45,10 +57,11 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
-import { SwitchButton, Menu } from '@element-plus/icons-vue'
+import { useRouter, useRoute } from 'vue-router'
+import { SwitchButton, Menu, Odometer, List, Calendar, KnifeFork } from '@element-plus/icons-vue'
 
 const router = useRouter()
+const route = useRoute()
 
 const handleLogout = () => {
   router.push('/login')

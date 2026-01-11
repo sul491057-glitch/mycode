@@ -45,7 +45,22 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'dashboard',
         name: 'AdminDashboard',
-        component: () => import('@/views/admin/Dashboard.vue'),
+        component: () => import('@/views/admin/Home.vue'),
+      },
+      {
+        path: 'orders',
+        name: 'AdminOrders',
+        component: () => import('@/views/admin/OrderList.vue'),
+      },
+      {
+        path: 'reservations',
+        name: 'AdminReservations',
+        component: () => import('@/views/admin/ReservationList.vue'),
+      },
+      {
+        path: 'products',
+        name: 'AdminProducts',
+        component: () => import('@/views/admin/ProductList.vue'),
       },
     ],
   },
