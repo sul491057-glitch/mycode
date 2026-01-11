@@ -14,13 +14,31 @@ public class WebConfig implements WebMvcConfigurer {
     @Autowired
     private LoginInterceptor loginInterceptor;
 
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        // 2. 🔥 这里使用注入进来的 loginInterceptor，千万不要再写 new LoginInterceptor() 了！
-        registry.addInterceptor(loginInterceptor)
-                .addPathPatterns("/**")
-                .excludePathPatterns("/api/login", "/login", "/register", "/images/**", "/static/**");
-    }
+
+
+//关于顾客和管理员关于token处理
+@Override
+public void addInterceptors(InterceptorRegistry registry) {
+    registry.addInterceptor(loginInterceptor)
+            .addPathPatterns("/**")
+            .excludePathPatterns(
+                    // 1. 登录接口 (必须改成 /api 开头！)
+                    "/api/login",           // 对应 UserController 的 @PostMapping("/login")
+                    "/api/user/guestLogin", // 如果你有免密登录，且路径也是 /api 下的
+
+                    // 2. 静态资源
+                    "/images/**",
+                    "/static/**",
+
+                    // 3. 菜品浏览 (之前修好的)
+                    "/api/products",
+                    "/api/products/**",
+
+                    // 4. 下单与预定 (如果有)
+                    "/api/orders/**",
+                    "/api/reservations/**"
+            );
+}
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {

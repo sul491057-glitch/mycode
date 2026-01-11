@@ -53,9 +53,14 @@ const handleAdminLogin = async () => {
   }
 }
 
-// 顾客登录逻辑（如果需要对接后端，也应改为 API 调用）
+// 顾客登录逻辑
 const handleCustomerLogin = () => {
-  localStorage.setItem('role', 'customer') // 标记为顾客身份
+  // 1. 清除可能存在的旧 Admin Token，防止权限混淆
+  localStorage.removeItem('token')
+  
+  // 2. 设置顾客身份
+  localStorage.setItem('role', 'customer')
+  
   ElMessage.success('欢迎光临！')
   router.push('/customer/home')
 }

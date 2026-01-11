@@ -85,8 +85,9 @@ router.beforeEach((to, from, next) => {
     return
   }
   
-  // 2. 检查是否有 token (如果没有 token，强制跳回登录页)
-  if (!token) {
+  // 2. 检查是否有 token (如果没有 token，且不是顾客身份，强制跳回登录页)
+  // 注意：允许顾客(role='customer')在无Token情况下访问，实现免密/访客模式
+  if (!token && role !== 'customer') {
     next('/login')
     return
   }
