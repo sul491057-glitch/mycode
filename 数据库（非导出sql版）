@@ -1,0 +1,125 @@
+/*
+ Navicat Premium Data Transfer
+ Target Server Type    : MySQL
+ Target Database       : restaurant_db
+ File Encoding         : 65001 (UTF-8)
+
+ Description           : 基于您最新提供的4张表结构生成的完整数据库
+*/
+
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- 1. 创建数据库
+-- ----------------------------
+CREATE DATABASE IF NOT EXISTS `restaurant_db` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `restaurant_db`;
+
+-- ----------------------------
+-- 2. 用户表 (user)
+-- 新增了 nickname, role, avatar 字段
+-- ----------------------------
+DROP TABLE IF EXISTS `user`;
+CREATE TABLE `user` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '用户ID (自增主键)',
+  `username` varchar(50) NOT NULL COMMENT '登录账号',
+  `password` varchar(100) NOT NULL COMMENT '登录密码 (加密)',
+  `nickname` varchar(50) DEFAULT NULL COMMENT '用户昵称',
+  `role` varchar(20) DEFAULT 'user' COMMENT '角色权限 (admin/user)',
+  `avatar` varchar(255) DEFAULT NULL COMMENT '用户头像路径',
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_username` (`username`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COMMENT='系统用户表';
+
+-- ----------------------------
+-- 3. 菜品表 (product)
+-- 修正了 price 类型, is_recommended 改为 tinyint
+-- ----------------------------
+DROP TABLE IF EXISTS `product`;
+CREATE TABLE `product` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '菜品ID (自增主键)',
+  `name` varchar(100) NOT NULL COMMENT '菜品名称',
+  `price` decimal(10,2) NOT NULL COMMENT '销售价格',
+  `description` varchar(255) DEFAULT NULL COMMENT '菜品详情描述',
+  `image_url` varchar(500) DEFAULT NULL COMMENT '菜品图片地址',
+  `category` varchar(50) DEFAULT NULL COMMENT '菜品分类 (热菜/凉菜等)',
+  `is_recommended` tinyint(1) DEFAULT 0 COMMENT '是否推荐 (1=是, 0=否)',
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '上架时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COMMENT='菜品信息表';
+
+-- ----------------------------
+-- 4. 预定表 (reservation) - 【新增】
+-- ----------------------------
+DROP TABLE IF EXISTS `reservation`;
+CREATE TABLE `reservation` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '预定ID (自增主键)',
+  `name` varchar(50) NOT NULL COMMENT '预约人姓名',
+  `phone` varchar(20) NOT NULL COMMENT '联系电话',
+  `reserve_time` datetime NOT NULL COMMENT '预约用餐时间',
+  `people_count` int(11) DEFAULT 1 COMMENT '用餐人数',
+  `note` varchar(255) DEFAULT NULL COMMENT '备注需求',
+  `status` varchar(20) DEFAULT 'pending' COMMENT '状态 (confirmed/pending/cancelled)',
+  `table_id` varchar(10) DEFAULT NULL COMMENT '分配桌号 (如: A1)',
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '提交时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='预定信息表';
+
+-- ----------------------------
+-- 5. 订单主表 (orders)
+-- 注意：ID 类型变更为 varchar(64) 存储 UUID
+-- ----------------------------
+DROP TABLE IF EXISTS `orders`;
+CREATE TABLE `orders` (
+  `id` varchar(64) NOT NULL COMMENT '订单编号 (UUID)',
+  `table_id` varchar(20) DEFAULT NULL COMMENT '桌号',
+  `total_amount` decimal(10,2) DEFAULT 0.00 COMMENT '订单总金额',
+  `status` varchar(20) DEFAULT '未完成' COMMENT '订单状态',
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '下单时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='订单主表';
+
+-- ----------------------------
+-- 6. 订单详情表 (order_item)
+-- 【系统必须】虽然您没贴出这个表的定义，但没有它无法记录“买了什么菜”
+-- 这里根据 orders 的 UUID 主键进行了适配
+-- ----------------------------
+DROP TABLE IF EXISTS `order_item`;
+CREATE TABLE `order_item` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `order_id` varchar(64) NOT NULL COMMENT '关联订单编号 (UUID)',
+  `product_id` bigint(20) NOT NULL COMMENT '关联菜品ID',
+  `quantity` int(11) DEFAULT 1 COMMENT '购买数量',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='订单明细表';
+
+-- ----------------------------
+-- 7. 初始化测试数据
+-- ----------------------------
+
+-- 初始化管理员 (admin / 123456)
+INSERT INTO `user` (`username`, `password`, `nickname`, `role`, `avatar`) VALUES 
+('admin', '123456', '超级管理员', 'admin', 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png');
+
+-- 初始化菜品
+INSERT INTO `product` (`name`, `price`, `description`, `image_url`, `category`, `is_recommended`) VALUES 
+('招牌红烧肉', 58.00, '肥而不腻，入口即化', 'https://example.com/hongshao.jpg', '热菜', 1),
+('清蒸鲈鱼', 45.00, '新鲜现杀，肉质鲜嫩', 'https://example.com/luyu.jpg', '热菜', 1),
+('拍黄瓜', 12.00, '脆爽开胃', 'https://example.com/huanggua.jpg', '凉菜', 0);
+
+-- 初始化一条预定信息
+INSERT INTO `reservation` (`name`, `phone`, `reserve_time`, `people_count`, `note`, `status`, `table_id`) VALUES 
+('张先生', '13800138000', '2026-02-14 18:30:00', 2, '需要靠窗位置', 'confirmed', 'A1');
+
+-- 初始化一条订单 (注意使用 UUID)
+INSERT INTO `orders` (`id`, `table_id`, `total_amount`, `status`) VALUES 
+('550e8400-e29b-41d4-a716-446655440000', 'A1', 103.00, '已完成');
+
+-- 初始化订单详情
+INSERT INTO `order_item` (`order_id`, `product_id`, `quantity`) VALUES 
+('550e8400-e29b-41d4-a716-446655440000', 1, 1), -- 1份红烧肉
+('550e8400-e29b-41d4-a716-446655440000', 2, 1); -- 1份鲈鱼
+
+SET FOREIGN_KEY_CHECKS = 1;
