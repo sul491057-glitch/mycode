@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getOrders } from "@/api/order";
 import { getReservations } from "@/api/reservation";
 import { getProductList } from "@/api/product";
 import { Wallet, Calendar, TrendCharts, PieChart } from '@element-plus/icons-vue'
+import { onRefreshDashboard, offRefreshDashboard } from '@/utils/eventBus'
 
 const router = useRouter()
 const orders = ref<any[]>([])
@@ -212,6 +213,13 @@ const fetchData = async () => {
 
 onMounted(() => {
   fetchData()
+  // 监听 WebSocket 传来的刷新事件
+  onRefreshDashboard(fetchData)
+})
+
+onUnmounted(() => {
+  // 移除监听，防止内存泄漏
+  offRefreshDashboard(fetchData)
 })
 </script>
 
@@ -221,7 +229,7 @@ onMounted(() => {
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div 
         @click="navigateTo('/admin/orders')"
-        class="cursor-pointer bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg shadow-indigo-200 transform hover:scale-105 transition-transform duration-300"
+        class="cursor-pointer bg-gradient-to-br from-indigo-500/80 to-purple-600/80 backdrop-blur-md rounded-2xl p-6 text-white shadow-lg shadow-indigo-200 transform hover:scale-105 transition-transform duration-300"
       >
         <div class="flex items-center justify-between mb-4">
           <div class="bg-white/20 p-2 rounded-lg">
@@ -235,7 +243,7 @@ onMounted(() => {
 
       <div 
         @click="navigateTo('/admin/reservations')"
-        class="cursor-pointer bg-gradient-to-br from-rose-500 to-orange-500 rounded-2xl p-6 text-white shadow-lg shadow-rose-200 transform hover:scale-105 transition-transform duration-300"
+        class="cursor-pointer bg-gradient-to-br from-rose-500/80 to-orange-500/80 backdrop-blur-md rounded-2xl p-6 text-white shadow-lg shadow-rose-200 transform hover:scale-105 transition-transform duration-300"
       >
         <div class="flex items-center justify-between mb-4">
           <div class="bg-white/20 p-2 rounded-lg">
@@ -249,7 +257,7 @@ onMounted(() => {
 
       <div 
         @click="navigateTo('/admin/orders')"
-        class="cursor-pointer bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col justify-center transform hover:scale-105 transition-transform duration-300"
+        class="cursor-pointer bg-white/60 backdrop-blur-md rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col justify-center transform hover:scale-105 transition-transform duration-300"
       >
         <div class="flex items-center gap-4 mb-2">
            <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center font-bold text-xl">
@@ -267,7 +275,7 @@ onMounted(() => {
     </div>
 
     <!-- 可视化趋势图 (调试版) -->
-   <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+   <div class="bg-white/60 backdrop-blur-md rounded-3xl p-8 shadow-sm border border-gray-100">
       <div class="flex items-center gap-3 mb-8">
         <div class="p-2 bg-green-50 text-green-600 rounded-lg">
           <el-icon class="text-xl"><TrendCharts /></el-icon>
@@ -300,7 +308,7 @@ onMounted(() => {
     </div>
 
     <!-- 饼状图区域 -->
-    <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+    <div class="bg-white/60 backdrop-blur-md rounded-3xl p-8 shadow-sm border border-gray-100">
       <div class="flex items-center gap-3 mb-8">
         <div class="p-2 bg-orange-50 text-orange-600 rounded-lg">
           <el-icon class="text-xl"><PieChart /></el-icon>
